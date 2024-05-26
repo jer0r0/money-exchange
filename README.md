@@ -1,1 +1,2 @@
-<h1>MONEY Exchanger </h1>
+<h1>MONEY EXCHANGER
+</h1>
