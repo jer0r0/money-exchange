@@ -1,17 +1,22 @@
-import money.ConsultaAPI;
-import money.Moneda;
+import money.*;
 
 import javax.swing.*;
 import javax.swing.text.NumberFormatter;
 import java.awt.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.text.NumberFormat;
 
 public class PrincipalClaseMoneda {
     private ConsultaAPI api;
+    private List<Operacion> operaciones;
 
     public PrincipalClaseMoneda(String apiKey) {
         this.api = new ConsultaAPI(apiKey);
+        this.operaciones = new ArrayList<>();
     }
     ImageIcon originalIcon = new ImageIcon("src/media/logosimple.png");
     Image scaledImage = originalIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
@@ -23,7 +28,7 @@ public class PrincipalClaseMoneda {
         // Cargar la imagen original y escalarla
 
 
-        while(true){
+        while(true) {
             // MONEDA DE ORIGEN
             String desdeCodigo = obtenerCodigoMoneda("Ingrese el código de la moneda de origen");
 
@@ -35,31 +40,53 @@ public class PrincipalClaseMoneda {
 
             Moneda monedaOrigen = new Moneda(desdeCodigo, cantidad);
 
-            try{
+            try {
                 Moneda monedaDestino = api.convertir(monedaOrigen, haciaCodigo);
-                System.out.println(monedaOrigen + " es igual a " + monedaDestino);
-                JOptionPane.showMessageDialog(null,monedaOrigen + " es igual a " + monedaDestino,"",0,icon );
-                int option = JOptionPane.showOptionDialog(
-                        null,
-                        "¿Desea convertir otra moneda?",
-                        "Confirmación",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.QUESTION_MESSAGE,
-                        icon, //ICONO
-                        new Object[]{"Sí", "No"},
-                        "Sí"
-                );
-                if(option==JOptionPane.NO_OPTION){
+
+                Operacion operacion = new Operacion(monedaOrigen,monedaDestino);
+                JOptionPane.showMessageDialog(null, monedaOrigen + " es igual a " + monedaDestino, "", 0, icon);
+
+                operaciones.add(operacion);
+
+
+                String[] options = {"SI", "No", "Operaciones Realizadas"};
+                int selectedOption = JOptionPane.showOptionDialog(null, "¿Desea continuar?\nSI\nNO\nVer operaciones", "Ver operaciones" , JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+
+                if (selectedOption == 1) {
                     JOptionPane.showMessageDialog(null, "Operación cancelada.","",0,icon);
                     break;
-                }
-            }catch(Exception e) {
+                } else if (selectedOption == 2) {
+                    StringBuilder mensaje = new StringBuilder();
+                    mensaje.append("Operaciones Realizadas:\n\n");
+                    for (Operacion elemento : operaciones) {
+                        mensaje.append(elemento).append("\n");
+                    }
+                    int option2 = JOptionPane.showOptionDialog(null, mensaje+"\n¿Desea volver a agregar otra conversion? ", "Operaciones Realizadas: ",JOptionPane.YES_NO_OPTION,0,icon,null,0);
+                    if (option2 == JOptionPane.NO_OPTION) {
+                        String[] optionsfinal = {"SALIR", "Generar .txt","Generar .json"};
+                        int selectedOption2 = JOptionPane.showOptionDialog(null, "SALIR\nGENERAR .TXT\nGENERAR .JSON", "Título", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, optionsfinal, options[0]);
+                        if(selectedOption2 == 0){
+                            break;
+                        } else if(selectedOption2 == 1){
+                            GeneradorDeTexto gen = new GeneradorDeTexto();
+                            gen.guardarTxt(operaciones);
+                            break;
+                        }else if(selectedOption2 == 2){
+                            GeneradorDeJson gen = new GeneradorDeJson();
+                            gen.guardarJson(operaciones);
+                            break;
+                        }
+                    }
+
+            }
+
+            } catch (Exception e) {
                 System.out.println("Error: " + e.getMessage());
             }
-            scanner.close();
-        }
 
+        }
     }
+
     private String obtenerCodigoMoneda(String mensaje) {
         JTextField textField = new JTextField();
         int option = JOptionPane.showConfirmDialog(null, textField, mensaje, JOptionPane.DEFAULT_OPTION,0,icon);
@@ -75,7 +102,6 @@ public class PrincipalClaseMoneda {
             return null; // Esto solo se ejecutará si el usuario cancela
         }
     }
-
     private double obtenerCantidad(String mensaje) {
         JFormattedTextField doubleField = new JFormattedTextField(NumberFormat.getNumberInstance());
         NumberFormatter formatter = (NumberFormatter) doubleField.getFormatter();
