@@ -1,5 +1,6 @@
 package money;
 
+
 public class Moneda {
     private String codigo;
     private double cantidad;
@@ -19,6 +20,6 @@ public class Moneda {
 
     @Override
     public String toString() {
-        return cantidad + " " + codigo;
+        return cantidad + " (" + codigo+")";
     }
 }
