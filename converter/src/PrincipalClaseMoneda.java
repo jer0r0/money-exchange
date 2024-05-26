@@ -3,6 +3,7 @@ import money.Moneda;
 
 import javax.swing.*;
 import javax.swing.text.NumberFormatter;
+import java.awt.*;
 import java.util.Scanner;
 import java.text.NumberFormat;
 
@@ -12,10 +13,16 @@ public class PrincipalClaseMoneda {
     public PrincipalClaseMoneda(String apiKey) {
         this.api = new ConsultaAPI(apiKey);
     }
+    ImageIcon originalIcon = new ImageIcon("src/media/logosimple.png");
+    Image scaledImage = originalIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+    ImageIcon icon = new ImageIcon(scaledImage);
 
     public void ejecutar() {
         Scanner scanner = new Scanner(System.in);
         JTextField textField = new JTextField();
+        // Cargar la imagen original y escalarla
+
+
         while(true){
             // MONEDA DE ORIGEN
             String desdeCodigo = obtenerCodigoMoneda("Ingrese el código de la moneda de origen");
@@ -31,27 +38,21 @@ public class PrincipalClaseMoneda {
             try{
                 Moneda monedaDestino = api.convertir(monedaOrigen, haciaCodigo);
                 System.out.println(monedaOrigen + " es igual a " + monedaDestino);
-                JOptionPane.showMessageDialog(null,monedaOrigen + " es igual a " + monedaDestino );
+                JOptionPane.showMessageDialog(null,monedaOrigen + " es igual a " + monedaDestino,"",0,icon );
                 int option = JOptionPane.showOptionDialog(
-                        null, // Componente padre (en este caso, ninguno)
-                        "¿Desea convertir otra moneda?", // Mensaje a mostrar
-                        "Confirmación", // Título del cuadro de diálogo
-                        JOptionPane.YES_NO_OPTION, // Tipo de opciones a mostrar
-                        JOptionPane.QUESTION_MESSAGE, // Tipo de mensaje (en este caso, una pregunta)
-                        null, // Icono personalizado (en este caso, ninguno)
-                        new Object[]{"Sí", "No"}, // Opciones disponibles
-                        "Sí" // Opción predeterminada}
+                        null,
+                        "¿Desea convertir otra moneda?",
+                        "Confirmación",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE,
+                        icon, //ICONO
+                        new Object[]{"Sí", "No"},
+                        "Sí"
                 );
-                if(option==JOptionPane.YES_OPTION){
-                    String apiKey = "ae16f90f181cf4aa80fca142";
-                    PrincipalClaseMoneda moneda = new PrincipalClaseMoneda(apiKey);
-                    moneda.ejecutar();
-                }else{
-                    JOptionPane.showMessageDialog(null, "Operación cancelada.");
+                if(option==JOptionPane.NO_OPTION){
+                    JOptionPane.showMessageDialog(null, "Operación cancelada.","",0,icon);
                     break;
                 }
-                break;
-
             }catch(Exception e) {
                 System.out.println("Error: " + e.getMessage());
             }
@@ -61,7 +62,7 @@ public class PrincipalClaseMoneda {
     }
     private String obtenerCodigoMoneda(String mensaje) {
         JTextField textField = new JTextField();
-        int option = JOptionPane.showConfirmDialog(null, textField, mensaje, JOptionPane.DEFAULT_OPTION);
+        int option = JOptionPane.showConfirmDialog(null, textField, mensaje, JOptionPane.DEFAULT_OPTION,0,icon);
         if (option == JOptionPane.OK_OPTION) {
             String codigo = textField.getText();
             if (!esCadenaTexto(codigo)) {
